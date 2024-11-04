@@ -1,0 +1,111 @@
+package com.inventory.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.inventory.entity.User;
+import com.inventory.repository.UserRepo;
+
+
+@Service
+public class LoginService {
+
+	    @Autowired
+	    private UserRepo userRepo;
+	    
+	    @Autowired
+	    private OtpService otpService;
+	    
+	    @Autowired
+	    private EmailService emailService;
+	    
+	    
+	    
+	    public boolean login(String username, String password) throws Exception{
+	        try {
+	            User user = userRepo.getUserByUsername(username);
+	            if (user != null && user.getPassword().equals(password) && user.getUsername().equals(username)) {
+	                int otp = otpService.generateOtp();
+	                user.setOtp(otp); 
+	                
+	                userRepo.save(user); 
+	                System.out.println("OTP successfully set in DB.");
+
+//		                String toEmail = user.getEmail();
+//		                String subject = "Verify login with OTP";
+//		                String body = "Your OTP is: " + otp;
+//		                emailService.sendSimpleEmail(toEmail, subject, body);
+//		                System.out.println("OTP sent to yyour email");
+		                
+	                return true; 
+	            }
+	            return false; 
+	            
+	        } catch (Exception e) {
+	            System.out.println("An unexpected error occurred: " + e.getMessage());
+	            return false; 
+	        }
+	    }
+
+	    
+//-----------------------------------------------------------------------------------------------------------------------------------------	    
+	    
+	    
+	    public boolean verify(int otp) {
+	    	User user = userRepo.getUserByOtp(otp);
+	    	if(user != null && user.getOtp() == otp) {
+	    		return true;
+	    	}
+	    	return false;
+	    }
+
+	    
+//-----------------------------------------------------------------------------------------------------------------------------------------	
+	    
+	    
+	    
+	    public boolean forgotPassword(String email) throws Exception {
+	    	
+	    	try {
+		    		User user = userRepo.getUserByEmail(email);
+			    	int newOtp = 0;
+		            
+			    	if(email != null && user.getEmail().equals(email)) {
+			    		int otp = otpService.generateOtp();
+			    		user.setOtp(otp);
+			    		userRepo.save(user);
+			    		System.out.println("OTP successfully set in DB.");
+			    		
+//			    		newOtp = otp;
+			    		 
+//			    			String toEmail = user.getEmail();
+//			                String subject = "Verify login with OTP";
+//			                String body = "Your OTP is: " + otp;
+//			                emailService.sendSimpleEmail(toEmail, subject, body);
+//			                System.out.println("OTP sent to your email");
+			                return true;
+			    	}
+			    	return false;
+		    	
+	    	}catch (Exception e) {
+	            System.out.println("An unexpected error occurred: " + e.getMessage());
+	            return false; 
+	        }
+	    	
+	    }	
+	    
+	    
+	    
+//-----------------------------------------------------------------------------------------------------------------------------------------	
+	    
+	    
+	    
+	    public boolean updatePassword(String email) {
+	    		userRepo.updatePasswordByEmail(email);
+	    	return true;
+	    }
+	    
+	    
+	    
+	    
+}

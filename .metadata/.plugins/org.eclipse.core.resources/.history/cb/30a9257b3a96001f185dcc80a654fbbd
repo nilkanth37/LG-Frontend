@@ -1,0 +1,61 @@
+package com.inventory.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.inventory.entity.User;
+import com.inventory.service.LoginService;
+
+@RestController
+public class LoginController {
+
+	@Autowired 
+	private LoginService loginService;
+	
+	
+	
+	
+	@PostMapping("/login")
+	public ResponseEntity<String> login(@RequestBody User user) throws Exception {
+	    boolean isPresent = loginService.login(user.getUsername(), user.getPassword());
+	    if (isPresent) {
+	        return new ResponseEntity<>("OTP sent to your gmail, please verify the OTP", HttpStatus.OK);
+	    } else {
+	        return new ResponseEntity<>("Invalid Username or Password", HttpStatus.UNAUTHORIZED);
+	    }
+	}
+	
+	
+	
+	@PostMapping("/verify")
+	public ResponseEntity<String> verify(@RequestBody User user){
+			boolean verified = loginService.verify(user.getOtp());
+			
+			if(verified) {
+				return new ResponseEntity<>("Verified Successfuly", HttpStatus.OK);
+			}else {
+				return new ResponseEntity<>("Please type correct OTP", HttpStatus.OK);
+			}
+	}
+	
+	
+	@PostMapping("/forgot")
+	public ResponseEntity<String> forgotPassword(@RequestBody User user) throws Exception{
+			boolean verified = loginService.forgotPassword(user.getUsername(), user.getEmail());
+			
+			if(verified) {
+				return new ResponseEntity<>("OTP sent to your email", HttpStatus.OK);
+			}else {
+				return new ResponseEntity<>("Please type correct Username", HttpStatus.OK);
+			}
+	}
+	
+	
+	
+	
+}
